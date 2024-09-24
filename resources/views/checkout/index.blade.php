@@ -48,6 +48,7 @@
                 <label for="payment_method">Phương thức thanh toán:</label>
                 <select name="payment_method" id="payment_method" class="form-control">
                     <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                    <option value="online">Thanh toán trực tuyến</option>
                     <!-- Thêm các phương thức thanh toán khác nếu cần -->
                 </select>
             </div>
