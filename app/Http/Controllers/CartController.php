@@ -2,70 +2,85 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Models\CartItem;
 use App\Models\Product;
-use App\Models\Cart; // Import model Cart
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // Hiển thị giỏ hàng
     public function index()
     {
-        $userId = auth()->id(); // Lấy ID người dùng đang đăng nhập
-        $cartItems = Cart::where('user_id', $userId)->with('product')->get();
+        // Kiểm tra nếu người dùng đã đăng nhập
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập để xem giỏ hàng.');
+        }
+
+        // Lấy giỏ hàng của người dùng đang đăng nhập
+        $cartItems = CartItem::where('user_id', Auth::id())->with(['product.category'])->get();
         
         return view('cart.index', compact('cartItems'));
     }
 
-    // Thêm sản phẩm vào giỏ hàng
-    public function add(Request $request, Product $product)
-    {
-        $userId = auth()->id(); // Lấy ID người dùng đang đăng nhập
-    
-        // Kiểm tra nếu sản phẩm đã tồn tại trong giỏ hàng
-        $cartItem = Cart::where('user_id', $userId)
-            ->where('product_id', $product->id) // Sử dụng thuộc tính id từ mô hình product
-            ->first();
-    
+    public function add(Request $request, $productId)
+{
+    try {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::findOrFail($productId);
+
+        // Tìm giỏ hàng của người dùng hiện tại
+        $cartItem = CartItem::where('user_id', Auth::id())
+                             ->where('product_id', $productId)
+                             ->first();
+
         if ($cartItem) {
-            // Cập nhật số lượng
-            $cartItem->quantity++;
+            // Nếu sản phẩm đã có trong giỏ, cập nhật số lượng
+            $cartItem->quantity += $request->quantity;
+            $cartItem->price = $product->price; // Cập nhật giá nếu cần
             $cartItem->save();
         } else {
-            // Thêm sản phẩm mới vào giỏ hàng
-            Cart::create([
-                'user_id' => $userId,
-                'product_id' => $product->id, // Đảm bảo $product có thuộc tính id
-                'quantity' => 1,
+            // Nếu sản phẩm chưa có trong giỏ, thêm mới
+            CartItem::create([
+                'user_id' => Auth::id(),
+                'product_id' => $productId,
+                'quantity' => $request->quantity,
+                'price' => $product->price,
             ]);
         }
-    
-        return redirect()->route('cart.index')->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
+
+        return redirect()->route('cart.index')->with('success', 'Thêm sản phẩm vào giỏ hàng thành công!');
+    } catch (\Exception $e) {
+        Log::error('Error adding to cart: ' . $e->getMessage());
+        return redirect()->route('cart.index')->with('error', 'Đã xảy ra lỗi khi thêm sản phẩm vào giỏ hàng.');
     }
-    
+}
 
-    // Xoá sản phẩm khỏi giỏ hàng
-    public function remove(Cart $cartItem)
+
+    public function update(Request $request, $id)
     {
-        $cartItem->delete(); // Xóa sản phẩm khỏi giỏ hàng
+        // Cập nhật số lượng sản phẩm trong giỏ hàng
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
 
-        return redirect()->route('cart.index')->with('success', 'Sản phẩm đã được xoá khỏi giỏ hàng.');
+        // Tìm giỏ hàng theo ID
+        $cartItem = CartItem::findOrFail($id);
+        $cartItem->quantity = $request->quantity;
+        $cartItem->save();
+
+        return redirect()->route('cart.index')->with('success', 'Cập nhật số lượng thành công!');
     }
 
-    // Cập nhật số lượng sản phẩm trong giỏ hàng
-    public function update(Request $request, Cart $cartItem)
+    public function remove($id)
     {
-        $quantity = $request->input('quantity');
+        // Xóa sản phẩm khỏi giỏ hàng
+        $cartItem = CartItem::findOrFail($id);
+        $cartItem->delete();
 
-        // Kiểm tra nếu số lượng hợp lệ
-        if ($quantity > 0) {
-            $cartItem->quantity = $quantity;
-            $cartItem->save();
-        } else {
-            // Nếu số lượng <= 0, xóa sản phẩm khỏi giỏ hàng
-            $cartItem->delete();
-        }
-
-        return redirect()->route('cart.index')->with('success', 'Giỏ hàng đã được cập nhật.');
+        return redirect()->route('cart.index')->with('success', 'Xóa sản phẩm thành công!');
     }
 }

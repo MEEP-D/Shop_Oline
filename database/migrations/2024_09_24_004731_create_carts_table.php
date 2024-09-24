@@ -9,9 +9,7 @@ class CreateCartsTable extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // Tham chiếu đến sản phẩm
-            $table->unsignedInteger('quantity')->default(1);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Tham chiếu đến người dùng
             $table->timestamps();
         });
     }

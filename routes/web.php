@@ -23,11 +23,10 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
 // Routes cho người dùng bình thường
+// Routes cho người dùng bình thường
 Route::middleware(['auth'])->group(function () {
-    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-    Route::delete('/cart/remove/{product}', [CartController::class, 'remove'])->name('cart.remove');
-    Route::patch('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update'); 
+    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add'); // Thêm sản phẩm vào giỏ
+    Route::resource('cart', CartController::class)->only(['index', 'remove', 'update']);
     Route::get('/cart/products/{product}', [CartController::class, 'show'])->name('cart.show'); 
 
     // Route cho sản phẩm
@@ -37,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     // Route cho thanh toán
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 });
+
 
 // Routes dành cho admin (yêu cầu quyền admin)
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -55,4 +55,4 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Route cho đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
-});
+});  

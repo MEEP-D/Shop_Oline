@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,10 +9,19 @@ class Cart extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'product_id', 'quantity'];
+    protected $fillable = [
+        'user_id', // Để xác định ai là người sở hữu giỏ hàng
+    ];
 
-    public function product()
+    // Quan hệ một-nhiều với CartItem
+    public function items()
     {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(CartItem::class);
+    }
+
+    // Quan hệ với User
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
