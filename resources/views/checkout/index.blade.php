@@ -12,6 +12,16 @@
         </div>
     @endif
 
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     @if(!empty($cart))
         <table class="table">
             <thead>
@@ -29,15 +39,15 @@
                         <td>{{ $item['name'] }}</td>
                         <td>{{ $item['category'] }}</td>
                         <td>{{ $item['quantity'] }}</td>
-                        <td>${{ number_format($item['price'], 2) }}</td>
-                        <td>${{ number_format($item['price'] * $item['quantity'], 2) }}</td>
+                        <td>{{ number_format($item['price'], 0, ',', '.') }} VND</td>
+                        <td>{{ number_format($item['price'] * $item['quantity'], 0, ',', '.') }} VND</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
 
         <div class="text-right">
-            <h3>Tổng tiền: ${{ number_format($total, 2) }}</h3>
+            <h3>Tổng tiền: {{ number_format($total, 0, ',', '.') }} VND</h3>
         </div>
 
         <!-- Form thanh toán -->
@@ -54,6 +64,12 @@
             </div>
             <button type="submit" class="btn btn-success">Đặt hàng</button>
         </form>
+        <form action="{{ route('checkout.destroy') }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit">Xóa</button>
+</form>
+
     @else
         <p>Giỏ hàng của bạn hiện tại đang trống.</p>
         <a href="{{ route('products.index') }}" class="btn btn-primary">Xem sản phẩm</a>

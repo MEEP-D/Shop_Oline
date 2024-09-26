@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     AuthController, 
@@ -12,47 +11,51 @@ use App\Http\Controllers\{
     CheckoutController
 };
 
-// Trang chủ welcome
+// Trang chủ
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
-// Đăng ký và đăng nhập người dùng
+// Đăng ký và đăng nhập
 Route::get('register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('register', [AuthController::class, 'register']);
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-// Routes cho người dùng bình thường
-// Routes cho người dùng bình thường
+// Các route yêu cầu người dùng phải đăng nhập
 Route::middleware(['auth'])->group(function () {
-    Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add'); // Thêm sản phẩm vào giỏ
-    Route::resource('cart', CartController::class)->only(['index', 'remove', 'update']);
-    Route::get('/cart/products/{product}', [CartController::class, 'show'])->name('cart.show'); 
-
-    // Route cho sản phẩm
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show');
+    // Giỏ hàng
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     
-    // Route cho thanh toán
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    // Sản phẩm
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index'); // Xem danh sách sản phẩm
+    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show'); // Xem chi tiết sản phẩm
+    
+    // Thanh toán
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index'); // Trang thanh toán
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process'); // Xử lý thanh toán
+    Route::delete('/checkout', [CheckoutController::class, 'destroy'])->name('checkout.destroy');
 });
 
-
-// Routes dành cho admin (yêu cầu quyền admin)
+// Các route yêu cầu người dùng phải có quyền admin
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Bảng điều khiển của Admin
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     
-    // Route quản lý sản phẩm
+    // Quản lý sản phẩm
     Route::resource('/admin/products', ProductController::class, [
-        'as' => 'admin' 
+        'as' => 'admin' // Định nghĩa các route dưới namespace 'admin'
     ]);
     
-    // Route quản lý danh mục
+    // Quản lý danh mục
     Route::resource('/admin/categories', CategoryController::class, [
-        'as' => 'admin' 
+        'as' => 'admin'
     ]);
 
-    // Route cho đơn hàng
+    // Quản lý đơn hàng
     Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
     Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
-});  
+});

@@ -1,101 +1,131 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
-    .table {
-        margin-top: 20px;
-        background-color: #f8f9fa; /* Màu nền cho bảng */
-    }
+<div class="container">
+    <h1 class="mt-4">Giỏ Hàng</h1>
 
-    .table th, .table td {
-        text-align: center; /* Căn giữa văn bản trong các ô */
-    }
-
-    .quantity-input {
-        text-align: center; /* Căn giữa ô nhập số lượng */
-    }
-
-    .btn {
-        margin-top: 5px; /* Khoảng cách cho nút */
-    }
-
-    .thead-dark th {
-        background-color: #343a40; /* Màu nền cho tiêu đề bảng */
-        color: white; /* Màu chữ cho tiêu đề bảng */
-    }
-
-    .d-flex {
-        margin-top: 20px; /* Khoảng cách trên cho phần tổng tiền */
-    }
-
-    .alert {
-        margin-top: 20px; /* Khoảng cách cho thông báo */
-    }
-</style>
-
-<div class="container mt-4">
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @elseif(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
     @endif
 
-    @if($cartItems && count($cartItems))
-        <table class="table table-bordered table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Tên Sản Phẩm</th>
-                    <th scope="col">Danh Mục</th>
-                    <th scope="col">Số Lượng</th>
-                    <th scope="col">Giá</th>
-                    <th scope="col">Thành Tiền</th>
-                    <th scope="col">Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $total = 0; @endphp
-                @foreach($cartItems as $item)
-                    @php
-                        $subtotal = $item->price * $item->quantity; // Tính thành tiền
-                        $total += $subtotal; 
-                    @endphp
-                    <tr>
-                        <td>{{ $item->product->name }}</td> <!-- Lấy tên sản phẩm -->
-                        <td>{{ $item->product->category->name }}</td> <!-- Lấy tên danh mục -->
-                        <td>
-                            <form action="{{ route('cart.update', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <input type="number" name="quantity" value="{{ $item->quantity }}" min="1" class="form-control quantity-input" style="width: 70px; display: inline;">
-                                <button type="submit" class="btn btn-sm btn-secondary">Cập nhật</button>
-                            </form>
-                        </td>
-                        <td>${{ number_format($item->price, 2) }}</td>
-                        <td>${{ number_format($subtotal, 2) }}</td>
-                        <td>
-                            <form action="{{ route('cart.remove', $item->id) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-
-        <div class="d-flex justify-content-between mt-3">
-            <div>
-                <a href="{{ route('welcome') }}" class="btn btn-primary">Tiếp tục mua sắm</a>
-            </div>
-            <div>
-                <h4>Tổng tiền: <span class="text-success">${{ number_format($total, 2) }}</span></h4>
-                <a href="{{ route('checkout.index') }}" class="btn btn-success">Thanh toán</a>
-            </div>
+    @if ($cartItems->isEmpty())
+        <div class="alert alert-warning">
+            Giỏ hàng của bạn hiện đang trống.
         </div>
     @else
-        <p>Giỏ hàng của bạn hiện tại đang trống. Hãy <a href="{{ route('welcome') }}">xem sản phẩm</a> để thêm vào giỏ hàng.</p>
-        <a href="{{ route('welcome') }}" class="btn btn-primary">Xem sản phẩm</a>
+        <form id="checkoutForm" method="POST" action="{{ route('checkout.process') }}">
+            @csrf
+            <table class="table table-bordered table-striped mt-4">
+                <thead class="table-light">
+                    <tr>
+                        <th></th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Số Lượng</th>
+                        <th>Giá</th>
+                        <th>Tổng</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($cartItems as $cartItem)
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="selected_products[]" value="{{ $cartItem->product_id }}" class="product-checkbox" data-price="{{ $cartItem->product->price * $cartItem->quantity }}">
+                            </td>
+                            <td>{{ $cartItem->product->name }}</td>
+                            <td>
+    <form action="{{ route('cart.update', $cartItem->product_id) }}" method="POST" class="d-flex align-items-center">
+        @csrf
+        <input type="number" name="quantity" value="{{ $cartItem->quantity }}" min="1" class="form-control me-2" style="width: 80px;">
+        <button type="submit" class="btn btn-sm btn-outline-primary">Cập Nhật</button>
+    </form>
+</td>
+
+                            <td>{{ number_format($cartItem->product->price, 0, ',', '.') }} VNĐ</td>
+                            <td>{{ number_format($cartItem->product->price * $cartItem->quantity, 0, ',', '.') }} VNĐ</td>
+                            <td>
+                                <form action="{{ route('cart.remove', $cartItem->product_id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between mt-3">
+                <form action="{{ route('cart.clear') }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Làm Sạch Giỏ Hàng</button>
+                </form>
+
+                <div>
+                    <h5>Tổng Tiền Giỏ Hàng: 
+                        <span id="totalAmount">0 VNĐ</span>
+                    </h5>
+                    <button type="submit" class="btn btn-success" id="checkoutButton">Tiến Hành Thanh Toán</button>
+                </div>
+            </div>
+        </form>
     @endif
 </div>
+
+<script>
+    // Hàm tính tổng tiền
+    function calculateTotal() {
+        let total = 0;
+        const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+
+        checkboxes.forEach(checkbox => {
+            const price = parseFloat(checkbox.getAttribute('data-price'));
+            total += price; // Cộng tổng tiền
+        });
+
+        document.getElementById('totalAmount').innerText = total.toLocaleString('en-US') + ' VNĐ'; // Cập nhật tổng tiền
+    }
+
+    // Thêm sự kiện cho các ô tích
+    document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', calculateTotal);
+    });
+
+    // Gọi hàm tính tổng khi trang được tải
+    document.addEventListener('DOMContentLoaded', calculateTotal);
+</script>
+
+<style>
+    /* Tùy chỉnh CSS cho bảng giỏ hàng */
+    table {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    th {
+        text-align: center;
+    }
+
+    td {
+        vertical-align: middle;
+    }
+
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .btn-outline-primary:hover,
+    .btn-outline-danger:hover {
+        filter: brightness(0.9);
+    }
+</style>
 @endsection
