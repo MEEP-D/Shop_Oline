@@ -35,9 +35,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show'); // Xem chi tiết sản phẩm
     
     // Thanh toán
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index'); // Trang thanh toán
-    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process'); // Xử lý thanh toán
-    Route::delete('/checkout', [CheckoutController::class, 'destroy'])->name('checkout.destroy');
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+    Route::post('/orders/store', [OrderController::class, 'store'])->name('order.store'); // Lưu đơn hàng
 });
 
 // Các route yêu cầu người dùng phải có quyền admin
@@ -54,8 +53,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('/admin/categories', CategoryController::class, [
         'as' => 'admin'
     ]);
-
-    // Quản lý đơn hàng
-    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
-    Route::post('/orders', [OrderController::class, 'store'])->name('order.store');
 });
+

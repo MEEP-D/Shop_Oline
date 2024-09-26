@@ -81,9 +81,19 @@ class CartController extends Controller
 
     // Xoá tất cả sản phẩm trong giỏ hàng
     public function clear()
-    {
-        // Xoá tất cả sản phẩm trong giỏ hàng của người dùng hiện tại
-        Cart::where('user_id', Auth::id())->delete();
+{
+    $userId = Auth::id();
+
+    // Kiểm tra xem giỏ hàng có sản phẩm hay không
+    $cartItemsCount = Cart::where('user_id', $userId)->count();
+
+    if ($cartItemsCount > 0) {
+        // Xóa tất cả sản phẩm trong giỏ hàng của người dùng hiện tại
+        Cart::where('user_id', $userId)->delete();
         return redirect()->route('cart.index')->with('success', 'Giỏ hàng đã được làm sạch.');
+    } else {
+        return redirect()->route('cart.index')->with('warning', 'Giỏ hàng của bạn hiện đang trống.');
     }
+}
+
 }
