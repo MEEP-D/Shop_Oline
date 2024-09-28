@@ -20,53 +20,50 @@ class OrderController extends Controller
         return view('orders.index', compact('orders'));
     }
 
-    // Xử lý đặt hàng
     public function store(Request $request)
     {
-        dd($request->all());
         // Xác thực dữ liệu từ form
         $validatedData = $request->validate([
-            'selected_products' => 'required|array',
-            'quantity' => 'required|integer|min:1', // thêm điều kiện cho quantity
+            'selected_products' => 'required|array', // Các sản phẩm được chọn
+            'quantity' => 'required|array', // Số lượng tương ứng cho mỗi sản phẩm
             'total' => 'required|numeric',
             'payment_method' => 'required|string',
         ]);
-        
-
-        // Lấy thông tin giỏ hàng từ session
-        $cart = session()->get('cart', []);
-        
-        // Kiểm tra nếu giỏ hàng trống
-        if (count($cart) == 0) {
-            return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn trống.');
+    
+        // Kiểm tra nếu không có sản phẩm nào được chọn
+        if (empty($validatedData['selected_products'])) {
+            return redirect()->back()->with('error', 'Bạn chưa chọn sản phẩm nào để đặt hàng.');
         }
-
+    
         // Tạo đơn hàng mới
         $order = Orders::create([
-            'user_id' => Auth::id(), 
-            'total' => $validatedData['total'], 
-            'status' => 'processing', 
-            'payment_method' => $validatedData['payment_method'], 
+            'user_id' => Auth::id(),
+            'total' => $validatedData['total'],
+            'status' => 'processing',
+            'payment_method' => $validatedData['payment_method'],
         ]);
-
-        // Lưu các sản phẩm trong đơn hàng
-        foreach ($request->selected_products as $index => $productId) {
-            OrderItems::create([
-                'order_id' => $order->id,
-                'product_id' => $productId,
-                'quantity' => $request->quantity[$index], // Nếu mỗi sản phẩm có số lượng khác nhau
-                'price' => $cart[$productId]['price'], // Giả định rằng bạn đã có giá trong giỏ hàng
-            ]);
+    
+        // Lưu các sản phẩm được chọn trong đơn hàng và xóa khỏi giỏ hàng
+        foreach ($validatedData['selected_products'] as $index => $productId) {
+            $quantity = $request->quantity[$index]; // Lấy số lượng cho từng sản phẩm
+            $cartItem = Cart::where('user_id', Auth::id())->where('product_id', $productId)->first();
+    
+            if ($cartItem) {
+                OrderItems::create([
+                    'order_id' => $order->id,
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'price' => $cartItem->product->price * $quantity, // Tổng giá cho sản phẩm
+                ]);
+    
+                // Xóa sản phẩm khỏi giỏ hàng
+                $cartItem->delete();
+            }
         }
-        
-        
-        // Xóa giỏ hàng khỏi cơ sở dữ liệu sau khi đặt hàng thành công
-        Cart::where('user_id', Auth::id())->delete();
-
-        // Xóa giỏ hàng khỏi session
-        session()->forget('cart');
-
+    
         // Chuyển hướng đến trang danh sách đơn hàng với thông báo thành công
         return redirect()->route('order.index')->with('success', 'Đặt hàng thành công!');
     }
+    
 }
+

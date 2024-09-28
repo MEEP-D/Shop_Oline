@@ -13,10 +13,9 @@ class Orders extends Model
         'user_id', 'total', 'status', 'payment_method'
     ];
 
-    // Quan hệ một-nhiều với OrderItems
     public function items()
     {
-        return $this->hasMany(OrderItems::class);
+        return $this->hasMany(OrderItems::class, 'order_id'); // Đảm bảo sử dụng đúng tên cột
     }
 
     // Quan hệ với User

@@ -8,7 +8,7 @@ use App\Http\Controllers\{
     CategoryController, 
     CartController,
     OrderController,
-    CheckoutController
+    InvoiceController
 };
 
 // Trang chủ
@@ -36,7 +36,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Thanh toán
     Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
-    Route::post('/orders/store', [OrderController::class, 'store'])->name('order.store'); // Lưu đơn hàng
+    Route::delete('/orders/store', [OrderController::class, 'store'])->name('order.store'); // Lưu đơn hàng
+    Route::get('/invoice/{orderId}', [InvoiceController::class, 'generateInvoice'])->name('invoice.generate');
+
 });
 
 // Các route yêu cầu người dùng phải có quyền admin
