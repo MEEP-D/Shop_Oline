@@ -32,8 +32,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     
     // Sản phẩm
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index'); // Xem danh sách sản phẩm
-    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show'); // Xem chi tiết sản phẩm
+    Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index'); 
+    Route::get('/products/{product}', [ProductController::class, 'show_normal'])->name('products.show'); 
+ 
     
     // Thanh toán
     Route::get('/orders', [OrderController::class, 'index'])->name('order.index');

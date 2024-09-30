@@ -19,7 +19,28 @@ class ProductController extends Controller
         $products = Product::with('category')->get();
         return view('admin.products.index', compact('products'));
     }
+    public function search(Request $request)
+    {
+        // Khởi tạo biến chứa sản phẩm
+        $products = collect();
 
+        // Xử lý tìm kiếm nếu có từ khóa
+        if ($request->has('keyword') && !empty($request->input('keyword'))) {
+            $keyword = $request->input('keyword');
+            // Tìm kiếm sản phẩm theo tên hoặc mô tả có chứa từ khóa
+            $products = Product::with('category')
+                                ->where(function($query) use ($keyword) {
+                                    $query->where('name', 'like', "%$keyword%")
+                                          ->orWhere('description', 'like', "%$keyword%");
+                                })
+                                ->paginate(10);
+            // Đính kèm từ khóa vào URL phân trang để giữ lại kết quả tìm kiếm khi chuyển trang
+            $products->appends(['keyword' => $keyword]);
+        }
+
+        // Trả về view với danh sách sản phẩm tìm được
+        return view('welcome', compact('products'));
+    }
     /**
      * Show the form for creating a new product.
      *
