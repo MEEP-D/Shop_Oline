@@ -36,7 +36,7 @@
                 <tr>
                     <td>{{ $product->name }}</td>
                     <td>{{ $product->description }}</td>
-                    <td>${{ number_format($product->price, 2) }}</td>
+                    <td>{{ number_format($product->price, 2) }} VND</td>
                     <td>{{ $product->category ? $product->category->name : 'Chưa có danh mục' }}</td>
                     <td>
                         <a class="btn btn-info" href="{{ route('admin.products.show', $product->id) }}">Xem</a>

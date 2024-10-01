@@ -18,6 +18,10 @@ class Orders extends Model
         return $this->hasMany(OrderItems::class, 'order_id'); // Đảm bảo sử dụng đúng tên cột
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
     // Quan hệ với User
     public function user()
     {

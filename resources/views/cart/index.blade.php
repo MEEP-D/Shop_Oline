@@ -4,11 +4,6 @@
 <div class="container">
     <h1 class="mt-4">Giỏ Hàng</h1>
 
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if ($cartItems->isEmpty())
         <div class="alert alert-warning">

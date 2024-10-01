@@ -6,7 +6,7 @@
     <h1>Chi Tiết Sản Phẩm</h1>
     <p><strong>Tên Sản Phẩm:</strong> {{ $product->name }}</p>
     <p><strong>Mô Tả:</strong> {{ $product->description }}</p>
-    <p><strong>Giá:</strong> ${{ number_format($product->price, 2) }}</p>
+    <p><strong>Giá:</strong> {{ number_format($product->price, 2) }}VND</p>
     <p><strong>Danh Mục:</strong> {{ $product->category ? $product->category->name : 'Chưa có danh mục' }}</p>
 
     <a class="btn btn-primary" href="{{ route('admin.products.edit', $product->id) }}">Sửa</a>

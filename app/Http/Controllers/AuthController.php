@@ -34,7 +34,7 @@ class AuthController extends Controller
                 'name' => $validatedData['name'],
                 'email' => $validatedData['email'],
                 'password' => Hash::make($validatedData['password']),
-                'role' => 'admin', 
+                'role' => 'customer', 
             ]);
 
             Log::info('User registered successfully');

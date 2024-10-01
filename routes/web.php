@@ -6,10 +6,12 @@ use App\Http\Controllers\{
     AdminController, 
     ProductController, 
     CategoryController, 
-    CartController,
     OrderController,
+    CartController,
     InvoiceController
 };
+use App\Http\Controllers\Admin\AdminOrderController;
+
 
 // Trang chủ
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -58,5 +60,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('/admin/categories', CategoryController::class, [
         'as' => 'admin'
     ]);
+    Route::get('/admin/orders', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('admin.orders.index');
+
+    // Route để cập nhật trạng thái đơn hàng
+    Route::patch('/admin/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
 });
+
 

@@ -36,7 +36,10 @@ class ProductController extends Controller
                                 ->paginate(10);
             // Đính kèm từ khóa vào URL phân trang để giữ lại kết quả tìm kiếm khi chuyển trang
             $products->appends(['keyword' => $keyword]);
-        }
+        }  else {
+
+            $products = Product::with('category')->paginate(10);
+    }
 
         // Trả về view với danh sách sản phẩm tìm được
         return view('welcome', compact('products'));

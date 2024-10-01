@@ -26,10 +26,11 @@
         </div>
     </div>
 
-    <!-- Thêm các phần khác như quản lý sản phẩm, danh mục -->
+    <!-- Thêm các phần khác như quản lý sản phẩm, danh mục, đơn hàng -->
     <div class="mt-4">
         <a href="{{ route('admin.products.index') }}" class="btn btn-primary">Manage Products</a>
         <a href="{{ route('admin.categories.index') }}" class="btn btn-secondary">Manage Categories</a>
+        <a href="{{ route('admin.orders.index') }}" class="btn btn-success">Manage Orders</a> <!-- Nút mới cho quản lý đơn hàng -->
     </div>
 </div>
 @endsection

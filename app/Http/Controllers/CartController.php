@@ -20,7 +20,7 @@ class CartController extends Controller
     public function add(Request $request, $id)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:0',
         ]);
 
         $product = Product::findOrFail($id);
@@ -57,7 +57,7 @@ class CartController extends Controller
 {
     // Xác thực dữ liệu đầu vào
     $request->validate([
-        'quantity' => 'required|integer|min:1',
+        'quantity' => 'required|integer|min:0',
     ]);
 
     // Tìm sản phẩm trong giỏ hàng của người dùng hiện tại
