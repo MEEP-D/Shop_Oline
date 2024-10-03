@@ -1,64 +1,51 @@
-{{-- resources/views/admin/orders/index.blade.php --}}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Sách Đơn Hàng</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}"> <!-- Include your CSS file -->
-</head>
-<body>
-    <div class="container">
-        <h1 class="my-4">Danh Sách Đơn Hàng</h1>
+@extends('layouts.app')
 
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
+@section('content')
+<div class="container">
+    <h1>Danh sách Đơn hàng</h1>
 
-        @if (session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
-        @endif
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
-        <table class="table table-bordered">
-            <thead>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên Khách Hàng</th>
+                <th>Tổng</th>
+                <th>Trạng thái</th>
+                <th>Phương thức thanh toán</th>
+                <th>Ngày tạo</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($orders as $order)
                 <tr>
-                    <th>ID</th>
-                    <th>Khách Hàng</th>
-                    <th>Tổng Giá</th>
-                    <th>Trạng Thái</th>
-                    <th>Hành Động</th>
+                    <td>{{ $order->id }}</td>
+                    <td>{{ $order->user->name }}</td> <!-- Hiển thị tên khách hàng -->
+                    <td>{{ number_format($order->total, 2) }} VNĐ</td>
+                    <td>{{ $order->status }}</td>
+                    <td>{{ $order->payment_method }}</td>
+                    <td>{{ $order->created_at }}</td>
+                    <td>
+                        <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('PATCH')
+                            <select name="status" class="form-control" required>
+                                <option value="processing" {{ $order->status === 'processing' ? 'selected' : '' }}>Đang xử lý</option>
+                                <option value="paid" {{ $order->status === 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
+                                <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+                            </select>
+                            <button type="submit" class="btn btn-warning mt-2">Cập nhật</button>
+                        </form>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach ($orders as $order)
-                    <tr>
-                        <td>{{ $order->id }}</td>
-                        <td>{{ $order->customer->name ?? 'N/A' }}</td>
-                        <td>{{ number_format($order->total_price, 2) }} VNĐ</td>
-                        <td>{{ ucfirst($order->status) }}</td>
-                        <td>
-                            <form action="{{ route('admin.orders.updateStatus', $order->id) }}" method="POST">
-                                @csrf
-                                @method('PATCH')
-                                <select name="status" required>
-                                    <option value="" disabled selected>Chọn trạng thái</option>
-                                    <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
-                                    <option value="paid" {{ $order->status == 'paid' ? 'selected' : '' }}>Đã thanh toán</option>
-                                    <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                                </select>
-                                <button type="submit" class="btn btn-primary btn-sm">Cập nhật</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <script src="{{ asset('js/app.js') }}"></script> <!-- Include your JS file -->
-</body>
-</html>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+@endsection

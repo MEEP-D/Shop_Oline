@@ -62,8 +62,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     ]);
     Route::get('/admin/orders', [App\Http\Controllers\Admin\OrderController::class, 'index'])->name('admin.orders.index');
 
-    // Route để cập nhật trạng thái đơn hàng
-    Route::patch('/admin/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    // Cập nhật trạng thái đơn hàng
+    Route::patch('/admin/orders/{id}', [App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+    Route::get('/admin/reports', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports.index');
 });
 
 
