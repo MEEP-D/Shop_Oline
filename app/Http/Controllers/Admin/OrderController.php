@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Validator; // Import Validator
 
 class OrderController extends Controller
 {
-    // Hiển thị tất cả đơn hàng cho admin
-    public function index()
+    // Hiển thị tất cả đơn hàng cho admin với phân trang
+    public function index(Request $request)
     {
-        // Lấy tất cả đơn hàng từ bảng orders
-        $orders = Orders::with('user')->get(); // Lấy đơn hàng cùng với thông tin người dùng
+        // Sử dụng paginate() để phân trang đơn hàng
+        $orders = Orders::with('user')->paginate(10); // Lấy đơn hàng cùng với thông tin người dùng và phân trang
 
         // Trả về view 'admin.orders.index' với danh sách đơn hàng
         return view('admin.orders.index', compact('orders'));

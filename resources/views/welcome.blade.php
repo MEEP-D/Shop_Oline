@@ -35,7 +35,10 @@
 
                         @auth
                             @if (Auth::user()->role === 'admin')
-                                <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-primary">Xem chi tiết</a>
+                                <div class="d-flex justify-content-center mb-2">
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-warning me-2">Chuyển sang trang Dashboard</a>
+                                    <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-primary">Xem chi tiết</a>
+                                </div>
                             @else
                                 <form action="{{ route('cart.add', $product->id) }}" method="POST" style="display:inline;">
                                     @csrf
