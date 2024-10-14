@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Cart; // Thêm import cho model Cart
 use Illuminate\Support\Facades\Auth;
 
+
 class CartController extends Controller
 {
     // Hiển thị giỏ hàng
@@ -52,50 +53,6 @@ class CartController extends Controller
         Cart::where('user_id', Auth::id())->where('product_id', $id)->delete();
         return redirect()->route('cart.index')->with('success', 'Sản phẩm đã được xoá khỏi giỏ hàng.');
     }
-
-    public function update(Request $request, $id)
-{
-    // Xác thực dữ liệu đầu vào
-    $request->validate([
-        'quantity' => 'required|integer|min:0',
-    ]);
-
-    // Tìm sản phẩm trong giỏ hàng của người dùng hiện tại
-    $cartItem = Cart::where('user_id', Auth::id())->where('product_id', $id)->first();
-
-    if ($cartItem) {
-        // Lấy sản phẩm dựa trên ID sản phẩm
-        $product = Product::where('id', $cartItem->product_id)->first();
-
-        // Cập nhật số lượng
-        $cartItem->quantity = $request->input('quantity');
-
-        // Nếu số lượng = 0, xóa sản phẩm khỏi giỏ hàng
-        if ($cartItem->quantity <= 0) {
-            $cartItem->delete();
-            return redirect()->route('cart.index')->with('success', 'Sản phẩm đã được xóa khỏi giỏ hàng.');
-        }
-
-        // Lưu thay đổi
-        $cartItem->save();
-
-        // Tính tổng tiền của giỏ hàng
-        $totalAmount = 0;
-        $cartItems = Cart::where('user_id', Auth::id())->get();
-        foreach ($cartItems as $item) {
-            $productPrice = Product::where('id', $item->product_id)->value('price'); // Lấy giá sản phẩm
-            $totalAmount += $productPrice * $item->quantity; // Cộng tổng tiền
-        }
-
-        // Cập nhật giá trị tổng vào session (hoặc tùy thuộc vào cách bạn muốn xử lý)
-        session(['total_amount' => $totalAmount]);
-
-        return redirect()->route('cart.index')->with('success', 'Cập nhật giỏ hàng thành công! Bạn đã cập nhật số lượng sản phẩm.');
-    }
-
-    return redirect()->route('cart.index')->with('error', 'Sản phẩm không tồn tại trong giỏ hàng.');
-}
-
     // Xoá tất cả sản phẩm trong giỏ hàng
     public function clear()
 {
@@ -114,3 +71,4 @@ class CartController extends Controller
 }
 
 }
+

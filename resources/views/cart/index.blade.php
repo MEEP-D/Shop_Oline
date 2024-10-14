@@ -39,7 +39,7 @@
                         <form action="{{ route('cart.remove', $cartItem->product_id) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Xoá</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger" >Xoá</button>
                         </form>
                     </td>
                 </tr>
@@ -66,6 +66,7 @@
     </div>
     <form action="{{ route('cart.clear') }}" method="POST" class="mt-2">
     @csrf
+    @method('DELETE')
     <button type="submit" class="btn btn-danger">Xóa Giỏ Hàng</button>
 </form>
 </form>
